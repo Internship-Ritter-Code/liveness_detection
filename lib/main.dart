@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:liveness_detection/custom_clip.dart';
 import 'package:liveness_detection/liveness_model.dart';
 
 List<CameraDescription> cameras = [];
@@ -119,38 +120,52 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Column(
-          children: [
-            Expanded(
-              flex: 4,
-              child: CameraPreview(controller),
-            ),
-            ValueListenableBuilder(
-              valueListenable: liveness,
-              builder: (context, val, _) {
-                return Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(liveness.value.horizontal != null
-                          ? (liveness.value.horizontal?.name ?? "")
-                          : "-"),
-                      Text(liveness.value.vertical != null
-                          ? (liveness.value.vertical?.name ?? "")
-                          : "-"),
-                      Text(
-                        liveness.value.smile != null
-                            ? liveness.value.smile!
-                                ? "Tersenyum"
-                                : "Tidak senyum"
-                            : "-",
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                flex: 4,
+                child: Stack(
+                  children: [
+                    CameraPreview(
+                      controller,
+                      child: ClipPath(
+                        clipper: SquareWithCircleClipper(),
+                        child: Container(
+                          color: Colors.black.withOpacity(0.8),
+                        ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+                    ),
+                  ],
+                ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: liveness,
+                builder: (context, val, _) {
+                  return Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text(liveness.value.horizontal != null
+                            ? (liveness.value.horizontal?.name ?? "")
+                            : "-"),
+                        Text(liveness.value.vertical != null
+                            ? (liveness.value.vertical?.name ?? "")
+                            : "-"),
+                        Text(
+                          liveness.value.smile != null
+                              ? liveness.value.smile!
+                                  ? "Tersenyum"
+                                  : "Tidak senyum"
+                              : "-",
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
